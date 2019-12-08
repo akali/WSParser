@@ -69,13 +69,15 @@ class Parser:
             if day_label is None:
                 continue
 
-            print(day_label.text)
+            #print(day_label.text)
             lessons_array = []
 
             for lessons in day.findAll("div", {"class": "v-label v-widget v-margin-left-2 v-label-v-margin-left-2 v-margin-right-2 v-label-v-margin-right-2 v-align-center v-label-v-align-center v-has-width"}):
                 print(lessons.text)
                 # In format Языки программирования Иванов И.И. П 321 (13:00-14:00)
-                lessons_array.append(lessons.text)
+                text = lessons.text
+                text = text.replace('\n', ' ')
+                lessons_array.append(text)
 
             res[day_label.text] = lessons_array
 
