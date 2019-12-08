@@ -32,11 +32,11 @@ class Parser:
     def get_schedule(self, year, semester):
         self.driver.get("https://wsp.kbtu.kz/StudentSchedule")
         # Give the javascript time to render
-        self.driver.implicitly_wait(5)
-        time.sleep(6)
+        self.driver.implicitly_wait(2)
+        time.sleep(2)
 
         year_field = self.driver.find_elements_by_xpath("//input[@class='v-filterselect-input']")[0]
-        # year_field.clear() doesnt for
+        # year_field.clear() doesnt work
         for i in range(9):
             year_field.send_keys(Keys.BACK_SPACE)
 
@@ -47,7 +47,7 @@ class Parser:
         time.sleep(2)
 
         semester_field = self.driver.find_elements_by_xpath("//input[@class='v-filterselect-input']")[1]
-        # year_field.clear() doesnt for
+        # year_field.clear() doesnt work
         for i in range(9):
             semester_field.send_keys(Keys.BACK_SPACE)
 
@@ -55,11 +55,37 @@ class Parser:
         semester_field.send_keys(semester[:-1])
         semester_field.send_keys(Keys.RETURN)
 
+        self.driver.implicitly_wait(2)
+        time.sleep(2)
+
+        soup = BeautifulSoup(self.driver.page_source)
+
+        days = soup.findAll("div", {"class": "v-slot v-slot-v-border-left-1-bfbfbf"})
+
+        res = {}
+
+        for day in days:
+            day_label = day.find("div", {"class": "v-label v-widget bold v-label-bold v-label-undef-w"})
+            if day_label is None:
+                continue
+
+            print(day_label.text)
+            lessons_array = []
+
+            for lessons in day.findAll("div", {"class": "v-label v-widget v-margin-left-2 v-label-v-margin-left-2 v-margin-right-2 v-label-v-margin-right-2 v-align-center v-label-v-align-center v-has-width"}):
+                print(lessons.text)
+                # In format Языки программирования Иванов И.И. П 321 (13:00-14:00)
+                lessons_array.append(lessons.text)
+
+            res[day_label.text] = lessons_array
+
+        return res
+
 
 if __name__ == '__main__':
     test = Parser("z_aman", "Password")
     test.login()
     time.sleep(6)
-    test.get_schedule("2018-2010", "Весенний")
+    test.get_schedule("2018-2019", "Весенний")
 
 # driver.quit()
